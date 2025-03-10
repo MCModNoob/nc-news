@@ -1,11 +1,16 @@
+const db = require("../db/connection");
+const data = require("../db/data/test-data/index");
+const seed = require("../db/seeds/seed");
 const endpointsJson = require("../endpoints.json");
+
 /* Set up your test imports here */
 const request = require("supertest")
 const app = require("../app")
 
-
 /* Set up your beforeEach & afterAll functions here */
 
+beforeAll(() => seed(data));
+afterAll(() => db.end());
 
 
 xdescribe("GET /api", () => {
