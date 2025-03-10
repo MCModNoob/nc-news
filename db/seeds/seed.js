@@ -32,9 +32,12 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
   .then(() => {
     return insertUsers(userData);
   })
-  .then((results) => {
-    return insertArticles(articleData,results,topicData);
+  .then(() => {
+    return insertArticles(articleData);
   })
+  // .then((results) => {
+  //   return insertComments(commentData,results);
+  // })
 };
 
 function createTopics() {
@@ -126,16 +129,10 @@ function insertUsers(userData) {
   return db.query(sqlQuery)
 }
 
-function insertArticles(articleData,results,topicData){
-  // console.log(topicData,"<<< data article")
-  // console.log(results,"<<< result")
-  
-    const users = results.rows;
-    //console.log(parks);
-    const topicLookupObject = createLookupObject(topicData, "topic", "slug");
-    //console.log(topiclookupObject);
+function insertArticles(articleData){
+
     const formattedArticle = articleData.map((article) => {
-        console.log("each article in Arti Data array", ":\n ", article);
+        // console.log("each article in Arti Data array", ":\n ", article);
         const articleValues = [
           article.title,
           article.topic,
@@ -144,7 +141,7 @@ function insertArticles(articleData,results,topicData){
           convertTimestampToDate({ created_at: article.created_at }).created_at,
           article.article_img_url
         ];
-        console.log(articleValues,"<<<articles values")
+        // console.log(articleValues,"<<<articles values")
         return articleValues;
     });
     //console.log(formattedRides, "<<< formattedRides");
