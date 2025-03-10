@@ -1,9 +1,10 @@
 const db = require("../connection");
-const { createLookupObject } = require("./utils");
-
+const { createLookupObject, convertTimestampToDate } = require("./utils");
+const format = require('pg-format');
 
 const seed = ({ topicData, userData, articleData, commentData }) => {
-  return db.query("DROP TABLE IF EXISTS comments;")
+  return db
+    .query("DROP TABLE IF EXISTS comments;")
     .then(() => {
       return db.query("DROP TABLE IF EXISTS articles;");
     })
@@ -14,55 +15,149 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
       return db.query("DROP TABLE IF EXISTS topics;");
     })
     .then(() => {
-      return createtopics();
+      return createTopics();
     })
     .then(() => {
-      return createusers();
+      return createUsers();
     })
     .then(() => {
-      return createarticles();
+      return createArticles();
     })
     .then(() => {
-      return createcomments();
+      return createComments();
     })
-    // .then(() => {
-    //   return insertcomments(commentData);
-    // });
-
-
+  .then(() => {
+    return insertTopics(topicData);
+  })
+  .then(() => {
+    return insertUsers(userData);
+  })
+  .then((results) => {
+    return insertArticles(articleData,results,topicData);
+  })
 };
 
-function createtopics() {
+function createTopics() {
   /* Create your topics table in the query below */
   return db.query(
-    "CREATE TABLE topics (slug VARCHAR(255) PRIMARY KEY, description VARCHAR(255), img_url VARCHAR(1000));"
+    `
+    CREATE TABLE topics 
+    (slug VARCHAR(255) PRIMARY KEY, 
+    description VARCHAR(255),
+    img_url VARCHAR(1000));
+    `
   );
 }
 
-function createusers() {
+function createUsers() {
   /* Create your users table in the query below */
   return db.query(
-    "CREATE TABLE users (username VARCHAR(100) PRIMARY KEY, name VARCHAR(100), avatar_url VARCHAR(1000));"
+    `
+    CREATE TABLE users 
+    (username VARCHAR(100) PRIMARY KEY, 
+    name VARCHAR(100), 
+    avatar_url VARCHAR(1000));
+    `
   );
 }
 
-function createarticles() {
+function createArticles() {
   /* Create your articles table in the query below */
   return db.query(
-    "CREATE TABLE articles (article_id SERIAL PRIMARY KEY, title VARCHAR(200), topic VARCHAR(255) REFERENCES topics(slug), author VARCHAR(100) REFERENCES users(username), body TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, votes INT DEFAULT 0, article_img_url VARCHAR(1000));"
+    `
+    CREATE TABLE articles 
+    (article_id SERIAL PRIMARY KEY, 
+    title VARCHAR(200) NOT NULL, 
+    topic VARCHAR(255) REFERENCES topics(slug) NOT NULL,
+    author VARCHAR(100) REFERENCES users(username) NOT NULL, 
+    body TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    votes INT DEFAULT 0,
+    article_img_url VARCHAR(1000)
+    );
+    `
   );
 }
 
-function createcomments() {
+function createComments() {
   /* Create your comments table in the query below */
   return db.query(
-    "CREATE TABLE comments (comment_id SERIAL PRIMARY KEY, article_id INT REFERENCES articles(article_id), body TEXT, votes INT DEFAULT 0, author VARCHAR(255) REFERENCES users(username), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+    `
+    CREATE TABLE comments (
+    comment_id SERIAL PRIMARY KEY, 
+    article_id INT REFERENCES articles(article_id) NOT NULL, 
+    body TEXT NOT NULL, 
+    votes INT DEFAULT 0, 
+    author VARCHAR(255) REFERENCES users(username) NOT NULL, 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    `
   );
 }
 
 // [ {Data object} ] <<<< data-file structure
 
-function insertcomments(commentData) {
+function insertTopics(topicsData) {
+  const formattedTopicData= topicsData.map(topic =>{
+    return [topic.slug , topic.description , topic.img_url]
+  })
+
+  const sqlQuery = format(`INSERT INTO topics
+    (
+    slug, 
+    description,
+    img_url )
+    VALUES %L;`,formattedTopicData
+  )
+  return db.query(sqlQuery)
+}
+
+function insertUsers(userData) {
+  const formattedUserData= userData.map(user=>{
+    return [user.username , user.name , user.avatar_url]
+  })
+  const sqlQuery = format(`INSERT INTO users
+    (
+    username, 
+    name,
+    avatar_url )
+    VALUES %L;`,formattedUserData
+  )
+  return db.query(sqlQuery)
+}
+
+function insertArticles(articleData,results,topicData){
+  // console.log(topicData,"<<< data article")
+  // console.log(results,"<<< result")
+  
+    const users = results.rows;
+    //console.log(parks);
+    const topicLookupObject = createLookupObject(topicData, "topic", "slug");
+    //console.log(topiclookupObject);
+    const formattedArticle = articleData.map((article) => {
+        console.log("each article in Arti Data array", ":\n ", article);
+        const articleValues = [
+          article.title,
+          article.topic,
+          article.author,
+          article.body,
+          convertTimestampToDate({ created_at: article.created_at }).created_at,
+          article.article_img_url
+        ];
+        console.log(articleValues,"<<<articles values")
+        return articleValues;
+    });
+    //console.log(formattedRides, "<<< formattedRides");
+    const sql = format(
+      "INSERT INTO articles (title, topic, author, body, created_at,article_img_url) VALUES %L RETURNING *;",
+      formattedArticle
+    );
+    return db.query(sql);
+  }
+  
+
+
+function insertComments(commentData) {
   const lookupObject = createLookupObject();
   const formattedData = commentData.map((commentObj) => {
     const commentValues = Object.values(commentObj);
@@ -74,4 +169,5 @@ function insertcomments(commentData) {
   );
   return db.query(sql);
 }
+
 module.exports = seed;
