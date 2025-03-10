@@ -35,7 +35,7 @@ describe('seed', () => {
       });
     });
 
-    test.only("check all articles foreign keys are not null", () => {
+    test("check all articles foreign keys are not null", () => {
       return db.query(`SELECT * FROM articles;`).then(({ rows: articles }) => {
         expect(articles.length).toBeGreaterThan(0);
 
@@ -66,7 +66,7 @@ describe('seed', () => {
         });
     });
 
-    test("comments table has foreign key constraints", () => {
+    test.only("comments table has foreign key constraints", () => {
       return db
         .query(
           `SELECT constraint_name, constraint_type
@@ -500,7 +500,7 @@ describe('seed', () => {
         });
       });
     });
-    test.only('articles data has been inserted correctly', () => {
+    test('articles data has been inserted correctly', () => {
       return db.query(`SELECT * FROM articles;`).then(({ rows: articles }) => {
         expect(articles).toHaveLength(13);
         articles.forEach((article) => {
@@ -515,7 +515,7 @@ describe('seed', () => {
         });
       });
     });
-    test('comments data has been inserted correctly', () => {
+    test.only('comments data has been inserted correctly', () => {
       return db.query(`SELECT * FROM comments;`).then(({ rows: comments }) => {
         expect(comments).toHaveLength(18);
         comments.forEach((comment) => {

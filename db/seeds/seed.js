@@ -35,9 +35,9 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
   .then(() => {
     return insertArticles(articleData);
   })
-  // .then((results) => {
-  //   return insertComments(commentData,results);
-  // })
+  .then((results) => {
+    return insertComments(commentData,results);
+  })
 };
 
 function createTopics() {
@@ -152,17 +152,24 @@ function insertArticles(articleData){
     return db.query(sql);
   }
   
+function insertComments(commentData,results) {
+  const articles = results.rows;
+  const articleLookupObject = createLookupObject(articles, "title", "article_id");
 
-
-function insertComments(commentData) {
-  const lookupObject = createLookupObject();
-  const formattedData = commentData.map((commentObj) => {
-    const commentValues = Object.values(commentObj);
+  const formattedCommentData = commentData.map((comment) => {
+    const commentValues = [
+      articleLookupObject[comment.article_title],
+      comment.body,
+      comment.votes,
+      comment.author,
+      convertTimestampToDate({ created_at: comment.created_at }).created_at
+    ];
     return commentValues;
   });
+
   const sql = format(
-    "INSERT INTO comments (article_title, body, votes, author) VALUES %L RETURNING *;",
-    formattedData
+    "INSERT INTO comments (article_id, body, votes, author,  created_at) VALUES %L RETURNING *;",
+    formattedCommentData
   );
   return db.query(sql);
 }
