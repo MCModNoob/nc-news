@@ -66,7 +66,7 @@ describe('seed', () => {
         });
     });
 
-    test.only("comments table has foreign key constraints", () => {
+    test("comments table has foreign key constraints", () => {
       return db
         .query(
           `SELECT constraint_name, constraint_type
@@ -515,7 +515,7 @@ describe('seed', () => {
         });
       });
     });
-    test.only('comments data has been inserted correctly', () => {
+    test('comments data has been inserted correctly', () => {
       return db.query(`SELECT * FROM comments;`).then(({ rows: comments }) => {
         expect(comments).toHaveLength(18);
         comments.forEach((comment) => {
