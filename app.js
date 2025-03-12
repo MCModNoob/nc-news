@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const endpointsJson = require("./endpoints.json");
 const {getAllTopics}=require("./controllers/topics.controller");
-const {getArticlesById}=require("./controllers/articles.controller");
+const {getArticlesById, getAllArticles}=require("./controllers/articles.controller");
 const handleNotExistEndpoint = require("./controllers/error.controller");
 const { errorMonitor } = require("supertest/lib/test");
 
@@ -15,6 +15,8 @@ app.get("/api", (req, res) => {
 app.get("/api/topics",getAllTopics)
 
 app.get("/api/articles/:article_id",getArticlesById)
+
+app.get("/api/articles", getAllArticles)
 
 app.all('/*', handleNotExistEndpoint)
 

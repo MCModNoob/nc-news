@@ -7,4 +7,13 @@ const fetchArticleById = (id)=>{
     })
 }
 
-module.exports= {fetchArticleById}
+const fetchArticle = ()=>{
+    return db.query(`SELECT * FROM articles ORDER BY created_at DESC`)
+    .then(({rows})=>{
+        return rows;
+    })
+}
+
+module.exports= {fetchArticleById,
+    fetchArticle
+}
