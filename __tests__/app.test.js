@@ -70,7 +70,7 @@ describe("GET /api/articles/:article_id", () => {
 });
 
 describe("GET /api/articles", () => {
-  test.only("200: Responds with an object of the all article in date decending order", () => {
+  test("200: Responds with an object of the all article in date decending order", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -88,7 +88,7 @@ describe("GET /api/articles", () => {
         });
       });
   });
-  test.only("200 : respond objects with dates in decending order",()=>{
+  test("200 : respond objects with dates in decending order",()=>{
     return request(app)
       .get("/api/articles")
       .expect(200)
