@@ -5,10 +5,8 @@ const {
  
 
 const getAllTopics=(request,response)=>{
-    console.log("any string");
     fetchAllTopics()
     .then( (rows) =>{
-        console.log(rows)
         response.status(200).send({ allTopics: rows });
     })
 }
