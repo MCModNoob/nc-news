@@ -48,10 +48,10 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/2")
       .expect(200)
       .then(({ body }) => {
-        console.log(" body >>>> : ", body);
+        // console.log(" body >>>> : ", body);
         expect(body.thisIdArticle).toHaveProperty("article_id", 2);
         const thisIdArticle = body.thisIdArticle;
-        console.log("body object in loop");
+        // console.log("body object in loop");
         expect(typeof thisIdArticle.article_id).toBe("number");
         expect(thisIdArticle.article_id).toBe(2);
         expect(thisIdArticle.title).toBe("Sony Vaio; or, The Laptop");
@@ -70,35 +70,74 @@ describe("GET /api/articles/:article_id", () => {
 });
 
 describe("GET /api/articles", () => {
-  test("200: Responds with an object of the all article in date decending order", () => {
+  test("200: Responds with an object of the all article", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
-      .then(({ body :{allArticle} }) => {
+      .then(({ body: { allArticle } }) => {
         console.log(" allArticle >>>> ", allArticle);
-          allArticle.forEach((article) => {
-            expect(typeof article.article_id).toBe("number");
-            expect(typeof article.title).toBe("string");
-            expect(typeof article.topic).toBe("string");
-            expect(typeof article.author).toBe("string");
-            expect(typeof article.body).toBe("string");
-            expect(typeof article.created_at).toBe("string");
-            expect(typeof article.votes).toBe("number");
-            expect(typeof article.article_img_url).toBe("string");
+        allArticle.forEach((article) => {
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.title).toBe("string");
+          expect(typeof article.topic).toBe("string");
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.body).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
         });
       });
   });
-  test("200 : respond objects with dates in decending order",()=>{
+  test("200 : respond objects with dates in decending order", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
-      .then(({ body :{allArticle} }) => {
-        console.log(" allArticle >>>> ", allArticle);
-          for (let i = 0; i < allArticle.length - 1; i++) {
-            const date1 = convertTimestampToDate({ created_at: allArticle[i].created_at }).created_at.getTime();
-            const date2 = convertTimestampToDate({ created_at: allArticle[i+1].created_at }).created_at.getTime();
+      .then(({ body: { allArticle } }) => {
+        for (let i = 0; i < allArticle.length - 1; i++) {
+          const date1 = convertTimestampToDate({
+            created_at: allArticle[i].created_at,
+          }).created_at.getTime();
+          const date2 = convertTimestampToDate({
+            created_at: allArticle[i + 1].created_at,
+          }).created_at.getTime();
+          expect(date1).toBeGreaterThanOrEqual(date2);
+        }
+      });
+  });
+
+  describe("GET /api/articles/:article_id/comments", () => {
+    test("200: Responds with an object of the all article", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          // console.log(" allcomments >>>> ", comments);
+          comments.forEach((comment) => {
+            expect(typeof comment.comment_id).toBe("number");
+            expect(comment.article_id).toBe(1);
+            expect(typeof comment.body).toBe("string");
+            expect(typeof comment.votes).toBe("number");
+            expect(typeof comment.author).toBe("string");
+            expect(typeof comment.created_at).toBe("string");
+          });
+        });
+    });
+    test("200 : respond objects with dates in decending order", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          // console.log(" comments >>>> ", comments);
+          for (let i = 0; i < comments.length - 1; i++) {
+            const date1 = convertTimestampToDate({
+              created_at: comments[i].created_at,
+            }).created_at.getTime();
+            const date2 = convertTimestampToDate({
+              created_at: comments[i + 1].created_at,
+            }).created_at.getTime();
             expect(date1).toBeGreaterThanOrEqual(date2);
           }
-      });
-  })
+        });
+    });
+  });
 });

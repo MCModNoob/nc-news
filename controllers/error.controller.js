@@ -1,7 +1,7 @@
 
 
 function handleNotExistEndpoint(request, response, next){
-    console.log("error reached")
+    console.log("Not Exist Endpoint")
     response.status(404).send({msg: "Not found"})
 }
 
