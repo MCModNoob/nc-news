@@ -1,3 +1,4 @@
+const { request } = require("../app");
 const db = require("../db/connection");
 
 const fetchArticleById = (id)=>{
@@ -14,6 +15,17 @@ const fetchArticle = ()=>{
     })
 }
 
-module.exports= {fetchArticleById,
-    fetchArticle
+const fetchcommentsByArticleId = (id) => {
+    return db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`, [id])
+    .then(({ rows }) => {
+
+        // console.log("rows>>> :",rows)
+        return rows
+    })
+}
+
+module.exports= {
+    fetchArticleById,
+    fetchArticle,
+    fetchcommentsByArticleId
 }
